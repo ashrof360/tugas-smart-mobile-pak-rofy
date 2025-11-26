@@ -216,7 +216,12 @@ class _PosScreenState extends State<PosScreen> {
                                         'Stok: ${product['stock']}',
                                         style: TextStyle(
                                           fontSize: priceFontSize,
-                                          color: Colors.grey,
+                                          color: const Color.fromARGB(
+                                            255,
+                                            85,
+                                            50,
+                                            50,
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -237,7 +242,9 @@ class _PosScreenState extends State<PosScreen> {
                   child: Container(
                     decoration: BoxDecoration(
                       border: Border(
-                        left: BorderSide(color: Colors.grey.shade300),
+                        left: BorderSide(
+                          color: const Color.fromARGB(255, 102, 64, 64),
+                        ),
                       ),
                     ),
                     child: Column(
@@ -245,12 +252,23 @@ class _PosScreenState extends State<PosScreen> {
                         Container(
                           padding: const EdgeInsets.all(16),
                           color: Colors.blue.shade50,
-                          child: Text(
-                            'Keranjang Belanja',
-                            style: TextStyle(
-                              fontSize: cartTitleFontSize,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.shopping_cart,
+                                size: 24,
+                                color: Colors.blue,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Keranjang',
+                                style: TextStyle(
+                                  fontSize: cartTitleFontSize,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         Expanded(
@@ -291,7 +309,9 @@ class _PosScreenState extends State<PosScreen> {
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
                             border: Border(
-                              top: BorderSide(color: Colors.grey.shade300),
+                              top: BorderSide(
+                                color: const Color.fromARGB(255, 133, 87, 87),
+                              ),
                             ),
                           ),
                           child: Column(
@@ -513,7 +533,7 @@ class _PosScreenState extends State<PosScreen> {
                         padding: const EdgeInsets.all(16),
                         color: Colors.blue.shade50,
                         child: Text(
-                          'Keranjang Belanja',
+                          '🛒',
                           style: TextStyle(
                             fontSize: cartTitleFontSize,
                             fontWeight: FontWeight.bold,

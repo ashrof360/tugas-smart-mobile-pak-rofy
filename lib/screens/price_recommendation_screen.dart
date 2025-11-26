@@ -179,7 +179,7 @@ class _PriceRecommendationScreenState extends State<PriceRecommendationScreen> {
                                   ? '+Rp $priceDiff'
                                   : 'Rp $priceDiff',
                               style: const TextStyle(
-                                color: Colors.white,
+                                color: Color.fromARGB(255, 189, 126, 126),
                                 fontSize: 12,
                               ),
                             ),
