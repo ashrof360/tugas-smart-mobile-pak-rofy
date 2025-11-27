@@ -227,8 +227,8 @@ class _PriceRecommendationScreenState extends State<PriceRecommendationScreen> {
                                     label: Text('Rp $price'),
                                     backgroundColor:
                                         price == product['currentPrice']
-                                        ? Colors.blue.shade100
-                                        : Colors.grey.shade100,
+                                        ? const Color.fromARGB(255, 38, 60, 78)
+                                        : const Color.fromARGB(255, 68, 42, 42),
                                   );
                                 },
                               ).toList(),

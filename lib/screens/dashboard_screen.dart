@@ -184,7 +184,7 @@ class DashboardScreen extends StatelessWidget {
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.1),
+              color: Colors.blue.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, color: Colors.blue, size: 30),
