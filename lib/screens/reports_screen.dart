@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:excel/excel.dart' as excel_pkg;
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
+import 'dart:io';
 
 class ReportsScreen extends StatefulWidget {
   const ReportsScreen({super.key});
@@ -321,26 +326,233 @@ class _ReportsScreenState extends State<ReportsScreen> {
   }
 
   void _exportReport() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Export laporan belum diimplementasi')),
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Export Laporan'),
+          content: const Text('Pilih format export:'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _exportPDF();
+              },
+              child: const Text('PDF'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _exportExcel();
+              },
+              child: const Text('Excel'),
+            ),
+          ],
+        );
+      },
     );
   }
 
-  void _shareReport() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Share laporan belum diimplementasi')),
-    );
+  void _shareReport() async {
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final file = File('${directory.path}/laporan_penjualan.pdf');
+
+      if (await file.exists()) {
+        await Share.shareXFiles([XFile(file.path)], text: 'Laporan Penjualan');
+      } else {
+        // Generate PDF first if it doesn't exist
+        _exportPDF();
+        await Future.delayed(
+          const Duration(seconds: 1),
+        ); // Wait for PDF to be generated
+        await Share.shareXFiles([XFile(file.path)], text: 'Laporan Penjualan');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Gagal share laporan')));
+    }
   }
 
-  void _exportPDF() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Export PDF belum diimplementasi')),
+  void _exportPDF() async {
+    final pdf = pw.Document();
+
+    pdf.addPage(
+      pw.Page(
+        build: (pw.Context context) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text(
+                'Laporan Penjualan',
+                style: pw.TextStyle(
+                  fontSize: 24,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+              pw.Text('Periode: $_selectedPeriod'),
+              pw.SizedBox(height: 20),
+              pw.Text(
+                'Ringkasan:',
+                style: pw.TextStyle(
+                  fontSize: 18,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+              pw.Text('Total Penjualan: Rp ${_reportData['totalSales']}'),
+              pw.Text('Jumlah Transaksi: ${_reportData['totalTransactions']}'),
+              pw.Text('Keuntungan: Rp ${_reportData['totalProfit']}'),
+              pw.SizedBox(height: 20),
+              pw.Text(
+                'Produk Terlaris:',
+                style: pw.TextStyle(
+                  fontSize: 18,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+              ...(_reportData['topProducts'] as List).map((product) {
+                return pw.Text(
+                  '${product['name']}: ${product['sales']} unit - Rp ${product['revenue']}',
+                );
+              }),
+              pw.SizedBox(height: 20),
+              pw.Text(
+                'Laporan Laba Rugi:',
+                style: pw.TextStyle(
+                  fontSize: 18,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+              pw.Text('Pendapatan Penjualan: Rp ${_reportData['totalSales']}'),
+              pw.Text(
+                'Harga Pokok Penjualan: -Rp ${(_reportData['totalSales'] * 0.7).round()}',
+              ),
+              pw.Text(
+                'Laba Kotor: Rp ${(_reportData['totalSales'] * 0.3).round()}',
+              ),
+              pw.Text(
+                'Biaya Operasional: -Rp ${(_reportData['totalSales'] * 0.15).round()}',
+              ),
+              pw.Text(
+                'Pajak: -Rp ${(_reportData['totalSales'] * 0.05).round()}',
+              ),
+              pw.Text(
+                'Laba Bersih: Rp ${_reportData['totalProfit']}',
+                style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+              ),
+            ],
+          );
+        },
+      ),
     );
+
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final file = File('${directory.path}/laporan_penjualan.pdf');
+      await file.writeAsBytes(await pdf.save());
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('PDF berhasil disimpan di ${file.path}')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Gagal export PDF')));
+    }
   }
 
-  void _exportExcel() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Export Excel belum diimplementasi')),
-    );
+  void _exportExcel() async {
+    var excel = excel_pkg.Excel.createExcel();
+    var sheet = excel['Laporan'];
+
+    // Header
+    sheet.appendRow([excel_pkg.TextCellValue('Laporan Penjualan')]);
+    sheet.appendRow([
+      excel_pkg.TextCellValue('Periode'),
+      excel_pkg.TextCellValue(_selectedPeriod),
+    ]);
+    sheet.appendRow([excel_pkg.TextCellValue('')]);
+
+    // Summary
+    sheet.appendRow([excel_pkg.TextCellValue('Ringkasan')]);
+    sheet.appendRow([
+      excel_pkg.TextCellValue('Total Penjualan'),
+      excel_pkg.TextCellValue('Rp ${_reportData['totalSales']}'),
+    ]);
+    sheet.appendRow([
+      excel_pkg.TextCellValue('Jumlah Transaksi'),
+      excel_pkg.TextCellValue('${_reportData['totalTransactions']}'),
+    ]);
+    sheet.appendRow([
+      excel_pkg.TextCellValue('Keuntungan'),
+      excel_pkg.TextCellValue('Rp ${_reportData['totalProfit']}'),
+    ]);
+    sheet.appendRow([excel_pkg.TextCellValue('')]);
+
+    // Top Products
+    sheet.appendRow([excel_pkg.TextCellValue('Produk Terlaris')]);
+    sheet.appendRow([
+      excel_pkg.TextCellValue('Nama Produk'),
+      excel_pkg.TextCellValue('Unit Terjual'),
+      excel_pkg.TextCellValue('Pendapatan'),
+    ]);
+    for (var product in _reportData['topProducts']) {
+      sheet.appendRow([
+        excel_pkg.TextCellValue(product['name']),
+        excel_pkg.TextCellValue('${product['sales']}'),
+        excel_pkg.TextCellValue('Rp ${product['revenue']}'),
+      ]);
+    }
+    sheet.appendRow([excel_pkg.TextCellValue('')]);
+
+    // Profit & Loss
+    sheet.appendRow([excel_pkg.TextCellValue('Laporan Laba Rugi')]);
+    sheet.appendRow([
+      excel_pkg.TextCellValue('Pendapatan Penjualan'),
+      excel_pkg.TextCellValue('Rp ${_reportData['totalSales']}'),
+    ]);
+    sheet.appendRow([
+      excel_pkg.TextCellValue('Harga Pokok Penjualan'),
+      excel_pkg.TextCellValue(
+        '-Rp ${(_reportData['totalSales'] * 0.7).round()}',
+      ),
+    ]);
+    sheet.appendRow([
+      excel_pkg.TextCellValue('Laba Kotor'),
+      excel_pkg.TextCellValue(
+        'Rp ${(_reportData['totalSales'] * 0.3).round()}',
+      ),
+    ]);
+    sheet.appendRow([
+      excel_pkg.TextCellValue('Biaya Operasional'),
+      excel_pkg.TextCellValue(
+        '-Rp ${(_reportData['totalSales'] * 0.15).round()}',
+      ),
+    ]);
+    sheet.appendRow([
+      excel_pkg.TextCellValue('Pajak'),
+      excel_pkg.TextCellValue(
+        '-Rp ${(_reportData['totalSales'] * 0.05).round()}',
+      ),
+    ]);
+    sheet.appendRow([
+      excel_pkg.TextCellValue('Laba Bersih'),
+      excel_pkg.TextCellValue('Rp ${_reportData['totalProfit']}'),
+    ]);
+
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final file = File('${directory.path}/laporan_penjualan.xlsx');
+      await file.writeAsBytes(excel.encode()!);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Excel berhasil disimpan di ${file.path}')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Gagal export Excel')));
+    }
   }
 }
