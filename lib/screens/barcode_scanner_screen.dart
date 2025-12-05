@@ -183,11 +183,15 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
 
   void _addToCart() {
     if (_scanResult.isNotEmpty) {
-      // Add product to cart logic
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Produk $_scanResult ditambahkan ke keranjang')),
-      );
-      Navigator.pop(context, _scanResult);
+      // Return product data
+      final product = {
+        'name': 'Indomie Goreng',
+        'price': 3500,
+        'stock': 50,
+        'image': 'https://m.media-amazon.com/images/I/710yLnSkQgL._SL1200_.jpg',
+        'category': 'Makanan',
+      };
+      Navigator.pop(context, product);
     }
   }
 

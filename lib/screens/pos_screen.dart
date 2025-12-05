@@ -50,22 +50,6 @@ class _PosScreenState extends State<PosScreen> {
           'https://ceklist.id/wp-content/uploads/2022/09/1-Roti-Tawar-Enak-Merk-Sari-Roti-Roti-Tawar-Gandum-150x150@2x.jpg',
       'category': 'Makanan',
     },
-    {
-      'name': 'Mie Sedap',
-      'price': 2500,
-      'stock': 40,
-      'image':
-          'https://tse3.mm.bing.net/th/id/OIP.p-qRI-U148H3V4VfnOQoggHaHa?pid=Api&P=0&h=180',
-      'category': 'Makanan',
-    },
-    {
-      'name': 'Chitato',
-      'price': 8500,
-      'stock': 25,
-      'image':
-          'https://i0.wp.com/bakulanadelaide.com/wp-content/uploads/2020/05/Chitato-Ayam-Bumbu-68gr.jpg?fit=1200%2C1200&ssl=1',
-      'category': 'Snack',
-    },
   ];
 
   @override
@@ -212,18 +196,6 @@ class _PosScreenState extends State<PosScreen> {
                                           color: Colors.green,
                                         ),
                                       ),
-                                      Text(
-                                        'Stok: ${product['stock']}',
-                                        style: TextStyle(
-                                          fontSize: priceFontSize,
-                                          color: const Color.fromARGB(
-                                            255,
-                                            85,
-                                            50,
-                                            50,
-                                          ),
-                                        ),
-                                      ),
                                     ],
                                   ),
                                 ),
@@ -286,17 +258,20 @@ class _PosScreenState extends State<PosScreen> {
                                   children: [
                                     IconButton(
                                       icon: const Icon(Icons.remove),
+                                      iconSize: 20,
                                       onPressed: () =>
                                           _updateQuantity(index, -1),
                                     ),
                                     Text('${item['quantity']}'),
                                     IconButton(
                                       icon: const Icon(Icons.add),
+                                      iconSize: 20,
                                       onPressed: () =>
                                           _updateQuantity(index, 1),
                                     ),
                                     IconButton(
                                       icon: const Icon(Icons.delete),
+                                      iconSize: 20,
                                       onPressed: () => _removeFromCart(index),
                                     ),
                                   ],
@@ -500,13 +475,6 @@ class _PosScreenState extends State<PosScreen> {
                                           color: Colors.green,
                                         ),
                                       ),
-                                      Text(
-                                        'Stok: ${product['stock']}',
-                                        style: TextStyle(
-                                          fontSize: priceFontSize,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
                                     ],
                                   ),
                                 ),
@@ -520,126 +488,139 @@ class _PosScreenState extends State<PosScreen> {
                 ),
 
                 // Cart
-                Container(
-                  height: 300, // Fixed height for mobile
-                  decoration: BoxDecoration(
-                    border: Border(
-                      top: BorderSide(color: Colors.grey.shade300),
+                Expanded(
+                  flex: 1,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border(
+                        top: BorderSide(color: Colors.grey.shade300),
+                      ),
                     ),
-                  ),
-                  child: Column(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        color: Colors.blue.shade50,
-                        child: Text(
-                          '🛒',
-                          style: TextStyle(
-                            fontSize: cartTitleFontSize,
-                            fontWeight: FontWeight.bold,
+                    child: Column(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          color: Colors.blue.shade50,
+                          child: Text(
+                            '🛒',
+                            style: TextStyle(
+                              fontSize: cartTitleFontSize,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                      ),
-                      Expanded(
-                        child: ListView.builder(
-                          itemCount: _cart.length,
-                          itemBuilder: (context, index) {
-                            final item = _cart[index];
-                            return ListTile(
-                              title: Text(item['name']),
-                              subtitle: Text(
-                                'Rp ${item['price']} x ${item['quantity']}',
-                              ),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
+                        Expanded(
+                          child: ListView.builder(
+                            itemCount: _cart.length,
+                            itemBuilder: (context, index) {
+                              final item = _cart[index];
+                              return ListTile(
+                                title: Text(item['name']),
+                                subtitle: Text(
+                                  'Rp ${item['price']} x ${item['quantity']}',
+                                ),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.remove),
+                                      iconSize: 20,
+                                      onPressed: () =>
+                                          _updateQuantity(index, -1),
+                                    ),
+                                    Text('${item['quantity']}'),
+                                    IconButton(
+                                      icon: const Icon(Icons.add),
+                                      iconSize: 20,
+                                      onPressed: () =>
+                                          _updateQuantity(index, 1),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.delete),
+                                      iconSize: 20,
+                                      onPressed: () => _removeFromCart(index),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            border: Border(
+                              top: BorderSide(color: Colors.grey.shade300),
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.remove),
-                                    onPressed: () => _updateQuantity(index, -1),
-                                  ),
-                                  Text('${item['quantity']}'),
-                                  IconButton(
-                                    icon: const Icon(Icons.add),
-                                    onPressed: () => _updateQuantity(index, 1),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.delete),
-                                    onPressed: () => _removeFromCart(index),
+                                  const Text('Subtotal:'),
+                                  Text(
+                                    'Rp ${_calculateSubtotal().toStringAsFixed(0)}',
                                   ),
                                 ],
                               ),
-                            );
-                          },
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          border: Border(
-                            top: BorderSide(color: Colors.grey.shade300),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text('Diskon:'),
+                                  Text('Rp $_discount'),
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text('Pajak (10%):'),
+                                  Text('Rp ${_tax.toStringAsFixed(0)}'),
+                                ],
+                              ),
+                              const Divider(),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text(
+                                    'Total:',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    'Rp ${_total.toStringAsFixed(0)}',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: totalFontSize,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  onPressed: _cart.isEmpty
+                                      ? null
+                                      : _showPaymentDialog,
+                                  style: ElevatedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                    ),
+                                  ),
+                                  child: const Text('Bayar'),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Text('Subtotal:'),
-                                Text(
-                                  'Rp ${_calculateSubtotal().toStringAsFixed(0)}',
-                                ),
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Text('Diskon:'),
-                                Text('Rp $_discount'),
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Text('Pajak (10%):'),
-                                Text('Rp ${_tax.toStringAsFixed(0)}'),
-                              ],
-                            ),
-                            const Divider(),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Text(
-                                  'Total:',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                Text(
-                                  'Rp ${_total.toStringAsFixed(0)}',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: totalFontSize,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                onPressed: _cart.isEmpty
-                                    ? null
-                                    : _showPaymentDialog,
-                                style: ElevatedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 16,
-                                  ),
-                                ),
-                                child: const Text('Bayar'),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -710,8 +691,11 @@ class _PosScreenState extends State<PosScreen> {
     );
     if (result != null && mounted) {
       // Add scanned product to cart
+      _addToCart(result);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Produk $result ditambahkan ke keranjang')),
+        SnackBar(
+          content: Text('Produk ${result['name']} ditambahkan ke keranjang'),
+        ),
       );
     }
   }
@@ -734,36 +718,61 @@ class _PosScreenState extends State<PosScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Pilih Metode Pembayaran'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.money),
-              title: const Text('Tunai'),
-              onTap: () => _processPayment('Tunai'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.qr_code),
-              title: const Text('QRIS'),
-              onTap: () => _processPayment('QRIS'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.account_balance),
-              title: const Text('Transfer'),
-              onTap: () => _processPayment('Transfer'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.phone_android),
-              title: const Text('E-Wallet'),
-              onTap: () => _processPayment('E-Wallet'),
-            ),
-          ],
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.money),
+                title: const Text('Tunai'),
+                onTap: () => _processPayment('Tunai'),
+              ),
+              ListTile(
+                leading: const Icon(Icons.qr_code),
+                title: const Text('QRIS'),
+                onTap: () => _processPayment('QRIS'),
+              ),
+              ListTile(
+                leading: const Icon(Icons.account_balance),
+                title: const Text('Transfer'),
+                onTap: () => _processPayment('Transfer'),
+              ),
+              ListTile(
+                leading: const Icon(Icons.phone_android),
+                title: const Text('E-Wallet'),
+                onTap: () => _processPayment('E-Wallet'),
+              ),
+              ListTile(
+                leading: const Icon(Icons.qr_code_scanner),
+                title: const Text('Barcode'),
+                onTap: () => _processPayment('Barcode'),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
   void _processPayment(String method) {
+    if (method == 'Barcode') {
+      _scanPaymentBarcode();
+    } else {
+      _finalizePayment(method);
+    }
+  }
+
+  void _scanPaymentBarcode() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const BarcodeScannerScreen()),
+    );
+    if (result != null && mounted) {
+      _finalizePayment('Barcode');
+    }
+  }
+
+  void _finalizePayment(String method) {
     Navigator.pop(context);
 
     // Create transaction data

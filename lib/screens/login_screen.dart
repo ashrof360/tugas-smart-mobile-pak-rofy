@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../services/auth_service.dart';
+import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -11,7 +13,9 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
+  final AuthService _authService = AuthService();
   String _selectedRole = 'Kasir';
+  bool _isLoading = false;
 
   final List<String> _roles = ['Admin', 'Kasir'];
 
@@ -110,20 +114,49 @@ class _LoginScreenState extends State<LoginScreen> {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: _login,
+                          onPressed: _isLoading ? null : _login,
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          child: const Text(
-                            'Login',
-                            style: TextStyle(fontSize: 16),
+                          child: _isLoading
+                              ? const CircularProgressIndicator()
+                              : const Text(
+                                  'Login',
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: _isLoading ? null : _signInWithGoogle,
+                          icon: const Icon(Icons.login),
+                          label: const Text('Login dengan Google'),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                           ),
                         ),
                       ),
                       const SizedBox(height: 16),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const RegisterScreen(),
+                            ),
+                          );
+                        },
+                        child: const Text('Belum punya akun? Daftar'),
+                      ),
+                      const SizedBox(height: 8),
                       TextButton(
                         onPressed: () {
                           // Face login placeholder
@@ -148,6 +181,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _login() {
     if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+
       // Simple authentication logic (replace with real auth)
       if (_usernameController.text == 'admin' &&
           _passwordController.text == 'admin') {
@@ -156,6 +193,35 @@ class _LoginScreenState extends State<LoginScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Username atau password salah')),
         );
+      }
+
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _signInWithGoogle() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final userCredential = await _authService.signInWithGoogle();
+      if (userCredential != null && mounted) {
+        Navigator.pushReplacementNamed(context, '/dashboard');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
   }

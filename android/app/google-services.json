@@ -12,7 +12,12 @@
           "package_name": "com.example.kasir_cerdass"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "74194479316-keag464k3fjhg95qjm0uak4v6jgu9au9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAKRXrA5E7s_GZRNvD5l44gAWjELEcJcDE"
@@ -20,7 +25,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "74194479316-keag464k3fjhg95qjm0uak4v6jgu9au9.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "74194479316-jv6g0l92k1vpb1eibk4k75jtmmh1saaa.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.kasirCerdass"
+              }
+            }
+          ]
         }
       }
     }

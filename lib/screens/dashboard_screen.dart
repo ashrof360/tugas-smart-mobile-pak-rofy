@@ -2,10 +2,16 @@ import 'package:flutter/material.dart';
 import 'barcode_scanner_screen.dart';
 import 'inventory_screen.dart';
 import 'reports_screen.dart';
+import 'digital_receipt_screen.dart';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -14,15 +20,11 @@ class DashboardScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications),
-            onPressed: () {
-              // Show notifications
-            },
+            onPressed: _showNotifications,
           ),
           IconButton(
             icon: const Icon(Icons.settings),
-            onPressed: () {
-              // Open settings
-            },
+            onPressed: _showSettings,
           ),
         ],
       ),
@@ -102,13 +104,7 @@ class DashboardScreen extends StatelessWidget {
                     ),
                   );
                 }),
-                _buildQuickAction('Cetak Struk', Icons.print, () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Fitur cetak struk belum diimplementasi'),
-                    ),
-                  );
-                }),
+                _buildQuickAction('Cetak Struk', Icons.print, _printReceipt),
                 _buildQuickAction('Laporan', Icons.analytics, () {
                   Navigator.push(
                     context,
@@ -141,6 +137,164 @@ class DashboardScreen extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  void _showNotifications() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Notifikasi'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: const [
+            ListTile(
+              leading: Icon(Icons.warning, color: Colors.red),
+              title: Text('Stok Indomie Goreng rendah'),
+              subtitle: Text('Stok tersisa: 2'),
+            ),
+            ListTile(
+              leading: Icon(Icons.attach_money, color: Colors.green),
+              title: Text('Penjualan hari ini mencapai target'),
+              subtitle: Text('Rp 2.500.000'),
+            ),
+            ListTile(
+              leading: Icon(Icons.inventory, color: Colors.blue),
+              title: Text('Produk baru ditambahkan'),
+              subtitle: Text('Chitato Lite'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Tutup'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showSettings() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Pengaturan'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.person),
+              title: const Text('Profil'),
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Fitur profil belum diimplementasi'),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.notifications),
+              title: const Text('Notifikasi'),
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Pengaturan notifikasi belum diimplementasi'),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.print),
+              title: const Text('Printer'),
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Pengaturan printer belum diimplementasi'),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Tutup'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _printReceipt() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Cetak Struk'),
+        content: const Text(
+          'Fitur cetak struk akan segera hadir. Untuk sementara, gunakan struk digital.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Tutup'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      const DigitalReceiptScreen(transaction: {}),
+                ),
+              );
+            },
+            child: const Text('Lihat Struk Digital'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _restockProduct(String productName) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        final controller = TextEditingController();
+        return AlertDialog(
+          title: Text('Restock $productName'),
+          content: TextField(
+            controller: controller,
+            decoration: const InputDecoration(
+              labelText: 'Jumlah tambah stok',
+              border: OutlineInputBorder(),
+            ),
+            keyboardType: TextInputType.number,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Batal'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final amount = int.tryParse(controller.text) ?? 0;
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Stok $productName ditambah $amount')),
+                );
+              },
+              child: const Text('Restock'),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -234,9 +388,7 @@ class DashboardScreen extends StatelessWidget {
             title: Text(products[index]),
             subtitle: Text('Stok tersisa: ${stocks[index]}'),
             trailing: ElevatedButton(
-              onPressed: () {
-                // Restock action
-              },
+              onPressed: () => _restockProduct(products[index]),
               child: const Text('Restock'),
             ),
           );
