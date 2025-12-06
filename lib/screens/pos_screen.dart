@@ -20,10 +20,11 @@ class _PosScreenState extends State<PosScreen> {
 
   final List<Map<String, dynamic>> _products = [
     {
-      'name': 'Indomie Goreng',
-      'price': 3500,
+      'name': 'Paroti',
+      'price': 1000,
       'stock': 50,
-      'image': 'https://m.media-amazon.com/images/I/710yLnSkQgL._SL1200_.jpg',
+      'image':
+          'https://tse3.mm.bing.net/th/id/OIP.GfvhrOs9R7oLGxEqJaZpsAAAAA?pid=Api&P=0&h=180',
       'category': 'Makanan',
     },
     {
@@ -49,6 +50,86 @@ class _PosScreenState extends State<PosScreen> {
       'image':
           'https://ceklist.id/wp-content/uploads/2022/09/1-Roti-Tawar-Enak-Merk-Sari-Roti-Roti-Tawar-Gandum-150x150@2x.jpg',
       'category': 'Makanan',
+    },
+    {
+      'name': 'Susu Milo',
+      'price': 15000,
+      'stock': 15,
+      'image':
+          'https://down-id.img.susercontent.com/file/id-11134201-23030-ijx4tn95cpov3c',
+      'category': 'Minuman',
+    },
+    {
+      'name': 'Roti Aoka',
+      'price': 10000,
+      'stock': 15,
+      'image':
+          'https://tse1.mm.bing.net/th/id/OIP.NUZnmw_yewAz6bbE2PddhgHaHa?pid=Api&P=0&h=180',
+      'category': 'Makanan',
+    },
+    {
+      'name': 'Roti Cream Mesis',
+      'price': 11000,
+      'stock': 15,
+      'image':
+          'https://tse2.mm.bing.net/th/id/OIP.v78RM3dv-6o5XCB8W6nhVAHaHa?pid=Api&P=0&h=180',
+      'category': 'Makanan',
+    },
+    {
+      'name': 'Roti Cheese Cake',
+      'price': 12000,
+      'stock': 15,
+      'image':
+          'https://tse2.mm.bing.net/th/id/OIP.3HGTGhbcRSKxmDyPzFQLWAAAAA?pid=Api&P=0&h=180',
+      'category': 'Makanan',
+    },
+    {
+      'name': 'Roti Kasur Coklat',
+      'price': 13000,
+      'stock': 15,
+      'image':
+          'https://tse2.mm.bing.net/th/id/OIP.TrIlnehH74WVsuoK25J0qQHaFS?pid=Api&P=0&h=180',
+      'category': 'Makanan',
+    },
+    {
+      'name': 'Roti Arnon',
+      'price': 14000,
+      'stock': 15,
+      'image':
+          'https://tse3.mm.bing.net/th/id/OIP.yftcbC-9XfNvYAxxePougQHaHa?pid=Api&P=0&h=180',
+      'category': 'Makanan',
+    },
+    {
+      'name': 'Susu Frision Flag',
+      'price': 20000,
+      'stock': 15,
+      'image':
+          'https://tse4.mm.bing.net/th/id/OIP.x8wLFcJlWizjqlZSdfWPwwHaHa?pid=Api&P=0&h=180',
+      'category': 'Minuman',
+    },
+    {
+      'name': 'Susu Indomilk',
+      'price': 3000,
+      'stock': 15,
+      'image':
+          'https://tse3.mm.bing.net/th/id/OIP.S2M7VvJG2E_8olHgyhv5gQHaHa?pid=Api&P=0&h=180',
+      'category': 'Minuman',
+    },
+    {
+      'name': 'Susu Milku',
+      'price': 5000,
+      'stock': 15,
+      'image':
+          'https://tse2.mm.bing.net/th/id/OIP.s9FyczmT10i91qBXnkWRDwHaHa?pid=Api&P=0&h=180',
+      'category': 'Minuman',
+    },
+    {
+      'name': 'Susu Krimer',
+      'price': 18000,
+      'stock': 15,
+      'image':
+          'https://tse4.mm.bing.net/th/id/OIP.mdD_PQ01rXaNcPwPJ66gtwHaHa?pid=Api&P=0&h=180',
+      'category': 'Minuman',
     },
   ];
 
