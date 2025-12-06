@@ -3,6 +3,7 @@ import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class DigitalReceiptScreen extends StatefulWidget {
   final Map<String, dynamic> transaction;
@@ -288,10 +289,33 @@ class _DigitalReceiptScreenState extends State<DigitalReceiptScreen> {
     }).toList();
   }
 
-  void _shareReceipt() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Share struk belum diimplementasi')),
-    );
+  void _shareReceipt() async {
+    final image = await _screenshotController.capture();
+    if (image != null) {
+      try {
+        final directory = await getTemporaryDirectory();
+        final imagePath =
+            '${directory.path}/receipt_${DateTime.now().millisecondsSinceEpoch}.png';
+        final imageFile = File(imagePath);
+        await imageFile.writeAsBytes(image);
+
+        await Share.shareXFiles([
+          XFile(imagePath),
+        ], text: 'Struk Pembelian dari Kasir Cerdas');
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Struk berhasil dibagikan')),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Gagal membagikan struk')),
+          );
+        }
+      }
+    }
   }
 
   void _downloadReceipt() async {
@@ -321,15 +345,123 @@ class _DigitalReceiptScreenState extends State<DigitalReceiptScreen> {
     }
   }
 
-  void _sendViaWhatsApp() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Kirim via WhatsApp belum diimplementasi')),
-    );
+  String _generateReceiptText() {
+    final transaction = widget.transaction;
+    final items = transaction['items'] as List<Map<String, dynamic>>? ?? [];
+
+    String text =
+        '''
+🧾 *STRUK PEMBELIAN*
+🏪 *KASIR CERDAS*
+
+📅 Tanggal: ${transaction['date'] ?? DateTime.now().toString().split(' ')[0]}
+🕐 Waktu: ${transaction['time'] ?? TimeOfDay.now().format(context)}
+👤 Kasir: ${transaction['cashier'] ?? 'Admin'}
+
+━━━━━━━━━━━━━━━━━━━━━━
+📋 *DETAIL PEMBELIAN*
+━━━━━━━━━━━━━━━━━━━━━━
+''';
+
+    for (var item in items) {
+      final name = item['name'] ?? '';
+      final quantity = item['quantity'] ?? 0;
+      final price = item['price'] ?? 0;
+      final total = price * quantity;
+      text += '$name\n';
+      text += '  ${quantity}x @ Rp $price = Rp $total\n\n';
+    }
+
+    text +=
+        '''━━━━━━━━━━━━━━━━━━━━━━
+💰 Subtotal: Rp ${transaction['subtotal'] ?? 0}
+💸 Diskon: Rp ${transaction['discount'] ?? 0}
+📊 Pajak (10%): Rp ${transaction['tax'] ?? 0}
+━━━━━━━━━━━━━━━━━━━━━━
+💵 *TOTAL: Rp ${transaction['total'] ?? 0}*
+
+💳 Pembayaran: ${transaction['paymentMethod'] ?? 'Tunai'}
+''';
+
+    if (transaction['paymentMethod'] == 'Tunai') {
+      text +=
+          '''💰 Bayar: Rp ${transaction['paid'] ?? 0}
+💵 Kembali: Rp ${transaction['change'] ?? 0}
+''';
+    }
+
+    text += '''
+━━━━━━━━━━━━━━━━━━━━━━
+🙏 Terima Kasih Atas Kunjungan Anda!
+📍 Jl. Contoh No. 123, Jakarta
+📞 Telp: (021) 1234567
+
+⚠️ Barang yang sudah dibeli tidak dapat dikembalikan
+━━━━━━━━━━━━━━━━━━━━━━
+''';
+
+    return text;
   }
 
-  void _sendViaEmail() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Kirim via Email belum diimplementasi')),
-    );
+  void _sendViaWhatsApp() async {
+    final receiptText = _generateReceiptText();
+    final whatsappUrl =
+        "whatsapp://send?text=${Uri.encodeComponent(receiptText)}";
+
+    try {
+      final uri = Uri.parse(whatsappUrl);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
+      } else {
+        // Fallback: try web WhatsApp
+        final webWhatsappUrl =
+            "https://wa.me/?text=${Uri.encodeComponent(receiptText)}";
+        final webUri = Uri.parse(webWhatsappUrl);
+        if (await canLaunchUrl(webUri)) {
+          await launchUrl(webUri);
+        } else {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('WhatsApp tidak terinstall')),
+            );
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Gagal membuka WhatsApp')));
+      }
+    }
+  }
+
+  void _sendViaEmail() async {
+    final receiptText = _generateReceiptText();
+    final subject =
+        'Struk Pembelian - Kasir Cerdas #${widget.transaction['id'] ?? '001'}';
+    final emailUrl =
+        'mailto:?subject=${Uri.encodeComponent(subject)}&body=${Uri.encodeComponent(receiptText)}';
+
+    try {
+      final uri = Uri.parse(emailUrl);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Tidak ada aplikasi email yang terinstall'),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Gagal membuka aplikasi email')),
+        );
+      }
+    }
   }
 }
