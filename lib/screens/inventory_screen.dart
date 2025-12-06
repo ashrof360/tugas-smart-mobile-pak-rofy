@@ -201,9 +201,131 @@ class _InventoryScreenState extends State<InventoryScreen> {
   }
 
   void _addProduct() {
-    // Navigate to add product screen
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Tambah produk belum diimplementasi')),
+    showDialog(
+      context: context,
+      builder: (context) {
+        final nameController = TextEditingController();
+        final priceController = TextEditingController();
+        final stockController = TextEditingController();
+        final minStockController = TextEditingController();
+        final imageController = TextEditingController();
+        String selectedCategory = 'Makanan';
+
+        return AlertDialog(
+          title: const Text('Tambah Produk Baru'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: nameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Nama Produk',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: priceController,
+                  decoration: const InputDecoration(
+                    labelText: 'Harga (Rp)',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: stockController,
+                  decoration: const InputDecoration(
+                    labelText: 'Stok Awal',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: minStockController,
+                  decoration: const InputDecoration(
+                    labelText: 'Stok Minimum',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  value: selectedCategory,
+                  decoration: const InputDecoration(
+                    labelText: 'Kategori',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: ['Makanan', 'Minuman'].map((category) {
+                    return DropdownMenuItem(
+                      value: category,
+                      child: Text(category),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    selectedCategory = value!;
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: imageController,
+                  decoration: const InputDecoration(
+                    labelText: 'URL Gambar (Opsional)',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Batal'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final name = nameController.text.trim();
+                final price = int.tryParse(priceController.text) ?? 0;
+                final stock = int.tryParse(stockController.text) ?? 0;
+                final minStock = int.tryParse(minStockController.text) ?? 0;
+                final image = imageController.text.trim().isEmpty
+                    ? 'https://via.placeholder.com/150'
+                    : imageController.text.trim();
+
+                if (name.isEmpty || price <= 0 || stock < 0 || minStock < 0) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Mohon isi semua field dengan benar'),
+                    ),
+                  );
+                  return;
+                }
+
+                setState(() {
+                  _products.add({
+                    'name': name,
+                    'stock': stock,
+                    'minStock': minStock,
+                    'price': price,
+                    'category': selectedCategory,
+                    'lastRestock': DateTime.now().toString().split(' ')[0],
+                    'sales': 0,
+                    'image': image,
+                  });
+                });
+
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Produk $name berhasil ditambahkan')),
+                );
+              },
+              child: const Text('Tambah'),
+            ),
+          ],
+        );
+      },
     );
   }
 

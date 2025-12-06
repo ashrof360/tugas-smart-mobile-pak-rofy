@@ -15,7 +15,7 @@ class _PosScreenState extends State<PosScreen> {
   final _searchController = TextEditingController();
   double _total = 0;
   double _tax = 0;
-  final double _discount = 0;
+  double _discount = 0; // made non-final so it can be changed later if needed
   late List<Map<String, dynamic>> _filteredProducts;
 
   final List<Map<String, dynamic>> _products = [
@@ -84,30 +84,32 @@ class _PosScreenState extends State<PosScreen> {
           final totalFontSize = isLargeScreen ? 10.0 : 14.0;
 
           if (isLargeScreen) {
-            return Row(
-              children: [
-                // Product List
-                Expanded(
-                  flex: 2,
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: TextField(
-                          controller: _searchController,
-                          decoration: InputDecoration(
-                            hintText: 'Cari produk...',
-                            prefixIcon: const Icon(Icons.search),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
+            return SingleChildScrollView(
+              child: Row(
+                children: [
+                  // Product List
+                  Expanded(
+                    flex: 2,
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: TextField(
+                            controller: _searchController,
+                            decoration: InputDecoration(
+                              hintText: 'Cari produk...',
+                              prefixIcon: const Icon(Icons.search),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
                             ),
+                            onChanged: _filterProducts,
                           ),
-                          onChanged: _filterProducts,
                         ),
-                      ),
-                      Expanded(
-                        child: GridView.builder(
+                        GridView.builder(
                           padding: const EdgeInsets.all(8),
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
                           gridDelegate:
                               SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: crossAxisCount,
@@ -128,50 +130,51 @@ class _PosScreenState extends State<PosScreen> {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       // Product Image
-                                      Container(
+                                      SizedBox(
                                         width: 60,
                                         height: 60,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(
-                                            8,
+                                        child: DecoratedBox(
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                            color: Colors.grey.shade200,
                                           ),
-                                          color: Colors.grey.shade200,
-                                        ),
-                                        child: ClipRRect(
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                          child: Image.network(
-                                            product['image'],
-                                            fit: BoxFit.cover,
-                                            loadingBuilder:
-                                                (
-                                                  context,
-                                                  child,
-                                                  loadingProgress,
-                                                ) {
-                                                  if (loadingProgress == null) {
-                                                    return child;
-                                                  }
-                                                  return const Center(
-                                                    child: SizedBox(
-                                                      width: 20,
-                                                      height: 20,
-                                                      child:
-                                                          CircularProgressIndicator(
-                                                            strokeWidth: 2,
-                                                          ),
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                            child: Image.network(
+                                              product['image'],
+                                              fit: BoxFit.cover,
+                                              loadingBuilder:
+                                                  (
+                                                    context,
+                                                    child,
+                                                    loadingProgress,
+                                                  ) => loadingProgress == null
+                                                  ? child
+                                                  : const Center(
+                                                      child: SizedBox(
+                                                        width: 20,
+                                                        height: 20,
+                                                        child:
+                                                            CircularProgressIndicator(
+                                                              strokeWidth: 2,
+                                                            ),
+                                                      ),
                                                     ),
-                                                  );
-                                                },
-                                            errorBuilder:
-                                                (context, error, stackTrace) {
-                                                  return const Icon(
+                                              errorBuilder:
+                                                  (
+                                                    context,
+                                                    error,
+                                                    stackTrace,
+                                                  ) => const Icon(
                                                     Icons.inventory,
                                                     size: 30,
                                                     color: Colors.grey,
-                                                  );
-                                                },
+                                                  ),
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -203,48 +206,52 @@ class _PosScreenState extends State<PosScreen> {
                             );
                           },
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Cart
-                Expanded(
-                  flex: 1,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: Border(
-                        left: BorderSide(
-                          color: const Color.fromARGB(255, 102, 64, 64),
-                        ),
-                      ),
+                      ],
                     ),
-                    child: Column(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          color: Colors.blue.shade50,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.shopping_cart,
-                                size: 24,
-                                color: Colors.blue,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Keranjang',
-                                style: TextStyle(
-                                  fontSize: cartTitleFontSize,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
+                  ),
+
+                  // Cart
+                  Expanded(
+                    flex: 1,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border(
+                          left: BorderSide(
+                            color: const Color.fromARGB(255, 102, 64, 64),
                           ),
                         ),
-                        Expanded(
-                          child: ListView.builder(
+                      ),
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.blue.shade50,
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(
+                                    Icons.shopping_cart,
+                                    size: 24,
+                                    color: Colors.blue,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Keranjang',
+                                    style: TextStyle(
+                                      fontSize: cartTitleFontSize,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
                             itemCount: _cart.length,
                             itemBuilder: (context, index) {
                               final item = _cart[index];
@@ -262,7 +269,9 @@ class _PosScreenState extends State<PosScreen> {
                                       onPressed: () =>
                                           _updateQuantity(index, -1),
                                     ),
-                                    Text('${item['quantity']}'),
+                                    Text(
+                                      item['quantity'].toString(),
+                                    ), // removed unnecessary interpolation
                                     IconButton(
                                       icon: const Icon(Icons.add),
                                       iconSize: 20,
@@ -279,96 +288,99 @@ class _PosScreenState extends State<PosScreen> {
                               );
                             },
                           ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            border: Border(
-                              top: BorderSide(
-                                color: const Color.fromARGB(255, 133, 87, 87),
+                          DecoratedBox(
+                            decoration: BoxDecoration(
+                              border: Border(
+                                top: BorderSide(
+                                  color: const Color.fromARGB(255, 133, 87, 87),
+                                ),
+                              ),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const Text('Subtotal:'),
+                                      Text(
+                                        'Rp ${_calculateSubtotal().toStringAsFixed(0)}',
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const Text('Diskon:'),
+                                      Text(
+                                        'Rp ${_discount.toStringAsFixed(0)}',
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const Text('Pajak (10%):'),
+                                      Text('Rp ${_tax.toStringAsFixed(0)}'),
+                                    ],
+                                  ),
+                                  const Divider(),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const Text(
+                                        'Total:',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Text(
+                                        'Rp ${_total.toStringAsFixed(0)}',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: totalFontSize,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 16),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: ElevatedButton(
+                                      onPressed: _cart.isEmpty
+                                          ? null
+                                          : _showPaymentDialog,
+                                      style: ElevatedButton.styleFrom(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 16,
+                                        ),
+                                      ),
+                                      child: const Text('Bayar'),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
-                          child: Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const Text('Subtotal:'),
-                                  Text(
-                                    'Rp ${_calculateSubtotal().toStringAsFixed(0)}',
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const Text('Diskon:'),
-                                  Text('Rp $_discount'),
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const Text('Pajak (10%):'),
-                                  Text('Rp ${_tax.toStringAsFixed(0)}'),
-                                ],
-                              ),
-                              const Divider(),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const Text(
-                                    'Total:',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Text(
-                                    'Rp ${_total.toStringAsFixed(0)}',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: totalFontSize,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                              SizedBox(
-                                width: double.infinity,
-                                child: ElevatedButton(
-                                  onPressed: _cart.isEmpty
-                                      ? null
-                                      : _showPaymentDialog,
-                                  style: ElevatedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 16,
-                                    ),
-                                  ),
-                                  child: const Text('Bayar'),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             );
           } else {
             // Mobile layout: Column
-            return Column(
-              children: [
-                // Product List
-                Expanded(
-                  flex: 3,
-                  child: Column(
+            return SingleChildScrollView(
+              child: Column(
+                children: [
+                  // Product List
+                  Column(
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(8.0),
@@ -384,113 +396,102 @@ class _PosScreenState extends State<PosScreen> {
                           onChanged: _filterProducts,
                         ),
                       ),
-                      Expanded(
-                        child: GridView.builder(
-                          padding: const EdgeInsets.all(8),
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: crossAxisCount,
-                                childAspectRatio: 1.0,
-                                crossAxisSpacing: 8,
-                                mainAxisSpacing: 8,
-                              ),
-                          itemCount: _filteredProducts.length,
-                          itemBuilder: (context, index) {
-                            final product = _filteredProducts[index];
-                            return Card(
-                              child: InkWell(
-                                onTap: () => _addToCart(product),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      // Product Image
-                                      Container(
-                                        width: 60,
-                                        height: 60,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                          color: Colors.grey.shade200,
-                                        ),
-                                        child: ClipRRect(
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                          child: Image.network(
-                                            product['image'],
-                                            fit: BoxFit.cover,
-                                            loadingBuilder:
-                                                (
-                                                  context,
-                                                  child,
-                                                  loadingProgress,
-                                                ) {
-                                                  if (loadingProgress == null) {
-                                                    return child;
-                                                  }
-                                                  return const Center(
-                                                    child: SizedBox(
-                                                      width: 20,
-                                                      height: 20,
-                                                      child:
-                                                          CircularProgressIndicator(
-                                                            strokeWidth: 2,
-                                                          ),
-                                                    ),
-                                                  );
-                                                },
-                                            errorBuilder:
-                                                (context, error, stackTrace) {
-                                                  return const Icon(
-                                                    Icons.inventory,
-                                                    size: 30,
-                                                    color: Colors.grey,
-                                                  );
-                                                },
-                                          ),
+                      GridView.builder(
+                        padding: const EdgeInsets.all(8),
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: crossAxisCount,
+                          childAspectRatio: 1.0,
+                          crossAxisSpacing: 8,
+                          mainAxisSpacing: 8,
+                        ),
+                        itemCount: _filteredProducts.length,
+                        itemBuilder: (context, index) {
+                          final product = _filteredProducts[index];
+                          return Card(
+                            child: InkWell(
+                              onTap: () => _addToCart(product),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    // Product Image
+                                    Container(
+                                      width: 60,
+                                      height: 60,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(8),
+                                        color: Colors.grey.shade200,
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.network(
+                                          product['image'],
+                                          fit: BoxFit.cover,
+                                          loadingBuilder:
+                                              (
+                                                context,
+                                                child,
+                                                loadingProgress,
+                                              ) => loadingProgress == null
+                                              ? child
+                                              : const Center(
+                                                  child: SizedBox(
+                                                    width: 20,
+                                                    height: 20,
+                                                    child:
+                                                        CircularProgressIndicator(
+                                                          strokeWidth: 2,
+                                                        ),
+                                                  ),
+                                                ),
+                                          errorBuilder:
+                                              (context, error, stackTrace) {
+                                                return const Icon(
+                                                  Icons.inventory,
+                                                  size: 30,
+                                                  color: Colors.grey,
+                                                );
+                                              },
                                         ),
                                       ),
-                                      const SizedBox(height: 4),
-                                      Flexible(
-                                        child: Text(
-                                          product['name'],
-                                          style: TextStyle(
-                                            fontSize: productFontSize,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                          textAlign: TextAlign.center,
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        'Rp ${product['price']}',
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Flexible(
+                                      child: Text(
+                                        product['name'],
                                         style: TextStyle(
-                                          fontSize: priceFontSize,
-                                          color: Colors.green,
+                                          fontSize: productFontSize,
+                                          fontWeight: FontWeight.bold,
                                         ),
+                                        textAlign: TextAlign.center,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      'Rp ${product['price']}',
+                                      style: TextStyle(
+                                        fontSize: priceFontSize,
+                                        color: Colors.green,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            );
-                          },
-                        ),
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
-                ),
 
-                // Cart
-                Expanded(
-                  flex: 1,
-                  child: Container(
+                  // Cart
+                  Container(
                     decoration: BoxDecoration(
                       border: Border(
                         top: BorderSide(color: Colors.grey.shade300),
@@ -498,132 +499,138 @@ class _PosScreenState extends State<PosScreen> {
                     ),
                     child: Column(
                       children: [
-                        Container(
+                        Padding(
                           padding: const EdgeInsets.all(16),
-                          color: Colors.blue.shade50,
-                          child: Text(
-                            '🛒',
-                            style: TextStyle(
-                              fontSize: cartTitleFontSize,
-                              fontWeight: FontWeight.bold,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.blue.shade50,
+                            ),
+                            child: Text(
+                              '🛒',
+                              style: TextStyle(
+                                fontSize: cartTitleFontSize,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
-                        Expanded(
-                          child: ListView.builder(
-                            itemCount: _cart.length,
-                            itemBuilder: (context, index) {
-                              final item = _cart[index];
-                              return ListTile(
-                                title: Text(item['name']),
-                                subtitle: Text(
-                                  'Rp ${item['price']} x ${item['quantity']}',
-                                ),
-                                trailing: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    IconButton(
-                                      icon: const Icon(Icons.remove),
-                                      iconSize: 20,
-                                      onPressed: () =>
-                                          _updateQuantity(index, -1),
-                                    ),
-                                    Text('${item['quantity']}'),
-                                    IconButton(
-                                      icon: const Icon(Icons.add),
-                                      iconSize: 20,
-                                      onPressed: () =>
-                                          _updateQuantity(index, 1),
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(Icons.delete),
-                                      iconSize: 20,
-                                      onPressed: () => _removeFromCart(index),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: _cart.length,
+                          itemBuilder: (context, index) {
+                            final item = _cart[index];
+                            return ListTile(
+                              title: Text(item['name']),
+                              subtitle: Text(
+                                'Rp ${item['price']} x ${item['quantity']}',
+                              ),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.remove),
+                                    iconSize: 20,
+                                    onPressed: () => _updateQuantity(index, -1),
+                                  ),
+                                  Text(
+                                    item['quantity'].toString(),
+                                  ), // removed unnecessary interpolation
+                                  IconButton(
+                                    icon: const Icon(Icons.add),
+                                    iconSize: 20,
+                                    onPressed: () => _updateQuantity(index, 1),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete),
+                                    iconSize: 20,
+                                    onPressed: () => _removeFromCart(index),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
                         ),
-                        Container(
-                          padding: const EdgeInsets.all(16),
+                        DecoratedBox(
                           decoration: BoxDecoration(
                             border: Border(
                               top: BorderSide(color: Colors.grey.shade300),
                             ),
                           ),
-                          child: Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const Text('Subtotal:'),
-                                  Text(
-                                    'Rp ${_calculateSubtotal().toStringAsFixed(0)}',
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const Text('Diskon:'),
-                                  Text('Rp $_discount'),
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const Text('Pajak (10%):'),
-                                  Text('Rp ${_tax.toStringAsFixed(0)}'),
-                                ],
-                              ),
-                              const Divider(),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const Text(
-                                    'Total:',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const Text('Subtotal:'),
+                                    Text(
+                                      'Rp ${_calculateSubtotal().toStringAsFixed(0)}',
                                     ),
-                                  ),
-                                  Text(
-                                    'Rp ${_total.toStringAsFixed(0)}',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: totalFontSize,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                              SizedBox(
-                                width: double.infinity,
-                                child: ElevatedButton(
-                                  onPressed: _cart.isEmpty
-                                      ? null
-                                      : _showPaymentDialog,
-                                  style: ElevatedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 16,
-                                    ),
-                                  ),
-                                  child: const Text('Bayar'),
+                                  ],
                                 ),
-                              ),
-                            ],
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const Text('Diskon:'),
+                                    Text('Rp ${_discount.toStringAsFixed(0)}'),
+                                  ],
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const Text('Pajak (10%):'),
+                                    Text('Rp ${_tax.toStringAsFixed(0)}'),
+                                  ],
+                                ),
+                                const Divider(),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const Text(
+                                      'Total:',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Text(
+                                      'Rp ${_total.toStringAsFixed(0)}',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: totalFontSize,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton(
+                                    onPressed: _cart.isEmpty
+                                        ? null
+                                        : _showPaymentDialog,
+                                    style: ElevatedButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 16,
+                                      ),
+                                    ),
+                                    child: const Text('Bayar'),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             );
           }
         },
@@ -654,7 +661,7 @@ class _PosScreenState extends State<PosScreen> {
     } else {
       _cart.add({...product, 'quantity': 1});
     }
-    _calculateTotal();
+    _calculateTotal(); // calls setState internally
   }
 
   void _updateQuantity(int index, int change) {
@@ -707,8 +714,11 @@ class _PosScreenState extends State<PosScreen> {
     );
     if (result != null && mounted) {
       // Add recognized product to cart
+      _addToCart(result);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Produk $result ditambahkan ke keranjang')),
+        SnackBar(
+          content: Text('Produk ${result['name']} ditambahkan ke keranjang'),
+        ),
       );
     }
   }
@@ -778,7 +788,7 @@ class _PosScreenState extends State<PosScreen> {
     // Create transaction data
     final transaction = {
       'id': DateTime.now().millisecondsSinceEpoch.toString(),
-      'date': DateTime.now().toString().split(' ')[0],
+      'date': DateTime.now().toIso8601String().split('T')[0],
       'time': TimeOfDay.now().format(context),
       'cashier': 'Admin',
       'items': _cart
@@ -795,28 +805,28 @@ class _PosScreenState extends State<PosScreen> {
       'tax': _tax,
       'total': _total,
       'paymentMethod': method,
-      'paid': method == 'Tunai'
-          ? _total
-          : _total, // Assume exact payment for demo
-      'change': method == 'Tunai' ? 0 : 0,
+      'paid': _total, // Assume exact payment for demo
+      'change': 0,
     };
 
     // Show success message
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Pembayaran dengan $method berhasil')),
-    );
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Pembayaran dengan $method berhasil')),
+      );
 
-    // Navigate to digital receipt
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => DigitalReceiptScreen(transaction: transaction),
-      ),
-    );
+      // Navigate to digital receipt
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => DigitalReceiptScreen(transaction: transaction),
+        ),
+      );
 
-    // Clear cart
-    _cart.clear();
-    _calculateTotal();
+      // Clear cart
+      _cart.clear();
+      _calculateTotal();
+    }
   }
 
   @override
